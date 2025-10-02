@@ -125,6 +125,72 @@ lib/
 
 این برنامه صرفاً برای پیگیری شخصی طراحی شده و جایگزین مشاوره پزشکی نیست. همیشه با پزشک خود مشورت کنید.
 
-## لایسنس
+## 📚 مستندات
 
-MIT License
+- **[SETUP.md](SETUP.md)** - راهنمای راه‌اندازی سریع در 5 دقیقه
+- **[RELEASE.md](RELEASE.md)** - راهنمای کامل Release و نسخه‌گذاری
+- **[.github/WORKFLOW_GUIDE.md](.github/WORKFLOW_GUIDE.md)** - راهنمای جامع CI/CD Workflows
+- **[.github/ARCHITECTURE.md](.github/ARCHITECTURE.md)** - معماری پروژه و سیستم‌ها
+
+## 🔧 اسکریپت‌های کمکی
+
+```bash
+# مدیریت نسخه (تعاملی)
+./scripts/version.sh
+
+# ساخت Release (APK + AAB)
+./scripts/build-release.sh
+```
+
+## 🤝 مشارکت
+
+1. Fork کنید
+2. Feature branch بسازید (`git checkout -b feature/amazing-feature`)
+3. تغییرات را کامیت کنید (`git commit -m 'feat: add amazing feature'`)
+4. Push کنید (`git push origin feature/amazing-feature`)
+5. Pull Request باز کنید
+
+CI/CD به صورت خودکار کد شما را بررسی می‌کند! ✨
+
+## 🐛 گزارش باگ و درخواست ویژگی
+
+از [GitHub Issues](../../issues) استفاده کنید:
+- 🐛 Bug Report
+- ✨ Feature Request
+- 📖 Documentation
+- ❓ Question
+
+## 📊 Workflows موجود
+
+| Workflow | محرک | عملیات |
+|----------|------|--------|
+| **Build and Release** | Push to main | ✅ Test → Build → Tag → Release |
+| **PR Check** | Pull Request | ✅ Format → Analyze → Test → Build |
+| **Manual Release** | دستی | ✅ کنترل کامل نسخه و Release |
+
+## 🎯 Roadmap
+
+- [ ] پشتیبانی از iOS
+- [ ] Cloud Sync (Firebase)
+- [ ] Export to PDF/CSV
+- [ ] یادآوری روزانه
+- [ ] پشتیبانی از چند زبان
+- [ ] تخمین HbA1c
+- [ ] اشتراک‌گذاری با پزشک
+
+## 📄 لایسنس
+
+MIT License - برای اطلاعات بیشتر [LICENSE](LICENSE) را ببینید
+
+## 🙏 تشکر
+
+- [Flutter](https://flutter.dev) - Framework عالی
+- [shamsi_date](https://pub.dev/packages/shamsi_date) - پشتیبانی تقویم شمسی
+- [fl_chart](https://pub.dev/packages/fl_chart) - نمودارهای زیبا
+- [sqflite](https://pub.dev/packages/sqflite) - پایگاه داده محلی
+
+---
+
+**ساخته شده با ❤️ برای جامعه فارسی‌زبان**
+
+⭐ اگر این پروژه برایتان مفید بود، یک ستاره بدهید!

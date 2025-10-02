@@ -44,26 +44,13 @@ class DatabaseHelper {
   // Insert or update entry (only one per day)
   Future<int> insertOrUpdateEntry(BloodSugarEntry entry) async {
     final db = await database;
-    
-    // Check if entry exists for this date
-    final existing = await db.query(
+    // Use conflictAlgorithm to perform atomic upsert
+    // UNIQUE constraint on (year, month, day) ensures replace behavior
+    return await db.insert(
       'blood_sugar_entries',
-      where: 'year = ? AND month = ? AND day = ?',
-      whereArgs: [entry.year, entry.month, entry.day],
+      entry.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
-
-    if (existing.isNotEmpty) {
-      // Update existing entry
-      return await db.update(
-        'blood_sugar_entries',
-        entry.toMap(),
-        where: 'year = ? AND month = ? AND day = ?',
-        whereArgs: [entry.year, entry.month, entry.day],
-      );
-    } else {
-      // Insert new entry
-      return await db.insert('blood_sugar_entries', entry.toMap());
-    }
   }
 
   // Get entry for today
@@ -101,21 +88,19 @@ class DatabaseHelper {
   // Get entries for last N months
   Future<List<BloodSugarEntry>> getEntriesLastMonths(int months) async {
     final db = await database;
-    final now = Jalali.now();
-    final threeMonthsAgo = now.addMonths(-months);
+    // Calculate cutoff date using Gregorian calendar for efficient SQL filtering
+    final now = DateTime.now();
+    final cutoffDate = DateTime(now.year, now.month - months, now.day);
+    final cutoffTimestamp = cutoffDate.millisecondsSinceEpoch;
 
     final maps = await db.query(
       'blood_sugar_entries',
+      where: 'timestamp >= ?',
+      whereArgs: [cutoffTimestamp],
       orderBy: 'timestamp ASC',
     );
 
-    final allEntries = maps.map((map) => BloodSugarEntry.fromMap(map)).toList();
-    
-    // Filter entries within the last N months
-    return allEntries.where((entry) {
-      final entryDate = Jalali(entry.year, entry.month, entry.day);
-      return entryDate.compareTo(threeMonthsAgo) >= 0;
-    }).toList();
+    return maps.map((map) => BloodSugarEntry.fromMap(map)).toList();
   }
 
   // Delete entry

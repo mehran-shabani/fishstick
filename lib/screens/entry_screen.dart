@@ -27,6 +27,8 @@ class _EntryScreenState extends State<EntryScreen> {
   Future<void> _loadTodayEntry() async {
     setState(() => _isLoading = true);
     final entry = await _db.getTodayEntry();
+    if (!mounted) return;
+    
     if (entry != null) {
       setState(() {
         _todayEntry = entry;
@@ -35,7 +37,12 @@ class _EntryScreenState extends State<EntryScreen> {
         _isLoading = false;
       });
     } else {
-      setState(() => _isLoading = false);
+      setState(() {
+        _todayEntry = null;
+        _bloodSugarController.clear();
+        _isFasting = true;
+        _isLoading = false;
+      });
     }
   }
 

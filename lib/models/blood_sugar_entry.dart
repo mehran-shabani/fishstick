@@ -56,7 +56,7 @@ class BloodSugarEntry {
       year: map['year'] as int,
       month: map['month'] as int,
       day: map['day'] as int,
-      bloodSugar: map['blood_sugar'] as double,
+      bloodSugar: (map['blood_sugar'] as num).toDouble(),
       isFasting: map['is_fasting'] == 1,
       timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int),
     );

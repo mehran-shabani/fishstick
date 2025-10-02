@@ -14,6 +14,8 @@ class ChartsScreen extends StatefulWidget {
 class _ChartsScreenState extends State<ChartsScreen> {
   final DatabaseHelper _db = DatabaseHelper.instance;
   List<BloodSugarEntry> _entries = [];
+  List<BloodSugarEntry> _fastingEntries = [];
+  List<BloodSugarEntry> _nonFastingEntries = [];
   bool _isLoading = true;
 
   @override
@@ -25,30 +27,32 @@ class _ChartsScreenState extends State<ChartsScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     final entries = await _db.getEntriesLastMonths(3);
+    if (!mounted) return;
+    
     setState(() {
       _entries = entries;
+      _fastingEntries = entries.where((e) => e.isFasting).toList();
+      _nonFastingEntries = entries.where((e) => !e.isFasting).toList();
       _isLoading = false;
     });
   }
 
   List<FlSpot> _getFastingSpots() {
-    final fastingEntries = _entries.where((e) => e.isFasting).toList();
     return List.generate(
-      fastingEntries.length,
+      _fastingEntries.length,
       (index) => FlSpot(
         index.toDouble(),
-        fastingEntries[index].bloodSugar,
+        _fastingEntries[index].bloodSugar,
       ),
     );
   }
 
   List<FlSpot> _getNonFastingSpots() {
-    final nonFastingEntries = _entries.where((e) => !e.isFasting).toList();
     return List.generate(
-      nonFastingEntries.length,
+      _nonFastingEntries.length,
       (index) => FlSpot(
         index.toDouble(),
-        nonFastingEntries[index].bloodSugar,
+        _nonFastingEntries[index].bloodSugar,
       ),
     );
   }
@@ -177,8 +181,18 @@ class _ChartsScreenState extends State<ChartsScreen> {
                   ),
                   minX: 0,
                   maxX: (spots.length - 1).toDouble(),
-                  minY: 0,
-                  maxY: 300,
+                  minY: () {
+                    final minValue = _calculateMin(entries);
+                    final maxValue = _calculateMax(entries);
+                    final padding = (maxValue - minValue) * 0.1;
+                    return (minValue - padding).clamp(0, double.infinity);
+                  }(),
+                  maxY: () {
+                    final minValue = _calculateMin(entries);
+                    final maxValue = _calculateMax(entries);
+                    final padding = (maxValue - minValue) * 0.1;
+                    return maxValue + padding;
+                  }(),
                   lineBarsData: [
                     LineChartBarData(
                       spots: spots,
@@ -283,7 +297,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
 
   double _calculateAverage(List<BloodSugarEntry> entries) {
     if (entries.isEmpty) return 0;
-    final sum = entries.fold<double>(0, (sum, entry) => sum + entry.bloodSugar);
+    final sum = entries.fold<double>(0.0, (sum, entry) => sum + entry.bloodSugar);
     return sum / entries.length;
   }
 
@@ -302,9 +316,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    final fastingEntries = _entries.where((e) => e.isFasting).toList();
-    final nonFastingEntries = _entries.where((e) => !e.isFasting).toList();
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -352,7 +363,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
               title: 'نمودار قند خون ناشتا 🌅',
               spots: _getFastingSpots(),
               color: Colors.blue,
-              entries: fastingEntries,
+              entries: _fastingEntries,
             ),
             const SizedBox(height: 20),
             // Non-Fasting Chart
@@ -360,7 +371,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
               title: 'نمودار قند خون غیر ناشتا 🍽️',
               spots: _getNonFastingSpots(),
               color: Colors.orange,
-              entries: nonFastingEntries,
+              entries: _nonFastingEntries,
             ),
             const SizedBox(height: 20),
             // Reference Card

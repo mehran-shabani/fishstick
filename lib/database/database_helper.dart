@@ -84,11 +84,8 @@ class DatabaseHelper {
 
     return maps.map((map) => BloodSugarEntry.fromMap(map)).toList();
   }
-
-  // Get entries for last N months
   Future<List<BloodSugarEntry>> getEntriesLastMonths(int months) async {
     final db = await database;
-    // Calculate cutoff date using Gregorian calendar for efficient SQL filtering
     final now = DateTime.now();
     final cutoffDate = DateTime(now.year, now.month - months, now.day);
     final cutoffTimestamp = cutoffDate.millisecondsSinceEpoch;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:shamsi_date/shamsi_date.dart';
 import '../models/blood_sugar_entry.dart';
 import '../database/database_helper.dart';
 
@@ -185,7 +184,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
                     final minValue = _calculateMin(entries);
                     final maxValue = _calculateMax(entries);
                     final padding = (maxValue - minValue) * 0.1;
-                    return (minValue - padding).clamp(0, double.infinity);
+                    return (minValue - padding).clamp(0.0, double.infinity);
                   }(),
                   maxY: () {
                     final minValue = _calculateMin(entries);

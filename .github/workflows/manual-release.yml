@@ -1,0 +1,152 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      custom_version:
+        description: 'Custom version (leave empty for auto-increment)'
+        required: false
+        type: string
+
+jobs:
+  manual-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Calculate new version
+        id: version
+        run: |
+          # Read current version
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Parse components
+          MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+          MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
+          PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
+          
+          # Check for custom version
+          if [ -n "${{ github.event.inputs.custom_version }}" ]; then
+            NEW_VERSION="${{ github.event.inputs.custom_version }}"
+          else
+            # Auto-increment based on type
+            case "${{ github.event.inputs.version_type }}" in
+              patch)
+                NEW_PATCH=$((PATCH + 1))
+                if [ $NEW_PATCH -ge 100 ]; then
+                  NEW_MINOR=$((MINOR + 1))
+                  NEW_PATCH=0
+                  if [ $NEW_MINOR -ge 100 ]; then
+                    MAJOR=$((MAJOR + 1))
+                    NEW_MINOR=0
+                  fi
+                else
+                  NEW_MINOR=$MINOR
+                fi
+                NEW_VERSION="${MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+                ;;
+              minor)
+                NEW_MINOR=$((MINOR + 1))
+                NEW_PATCH=0
+                if [ $NEW_MINOR -ge 100 ]; then
+                  MAJOR=$((MAJOR + 1))
+                  NEW_MINOR=0
+                fi
+                NEW_VERSION="${MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+                ;;
+              major)
+                MAJOR=$((MAJOR + 1))
+                NEW_VERSION="${MAJOR}.0.0"
+                ;;
+            esac
+          fi
+          
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          FULL_VERSION="${NEW_VERSION}+${BUILD_NUMBER}"
+          
+          echo "New version: $FULL_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: ${FULL_VERSION}/" pubspec.yaml
+      
+      - name: Run tests
+        run: flutter test
+        continue-on-error: true
+      
+      - name: Build APK
+        run: flutter build apk --release
+      
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+      
+      - name: Commit version bump
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add pubspec.yaml
+          git commit -m "chore: manual release v${{ steps.version.outputs.version }} [skip ci]"
+          git push
+      
+      - name: Create Git Tag
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "v${{ steps.version.outputs.version }}"
+          name: "نسخه ${{ steps.version.outputs.version }}"
+          body: |
+            ## 🎉 نسخه ${{ steps.version.outputs.version }}
+            
+            ### اطلاعات نسخه
+            - نوع به‌روزرسانی: ${{ github.event.inputs.version_type }}
+            - شماره ساخت: ${{ steps.version.outputs.build_number }}
+            - تاریخ انتشار: $(date +'%Y-%m-%d %H:%M:%S')
+            
+            ### فایل‌های قابل دانلود
+            - **APK اندروید**: برای نصب مستقیم
+            - **App Bundle (AAB)**: برای انتشار در Google Play
+            
+            ### نصب
+            1. فایل `app-release.apk` را دانلود کنید
+            2. روی دستگاه اندروید خود نصب کنید
+            3. در صورت نیاز، نصب از منابع ناشناخته را فعال کنید
+            
+            ---
+            *این نسخه به صورت دستی ساخته و منتشر شده است*
+          draft: false
+          prerelease: false
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

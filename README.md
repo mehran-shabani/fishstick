@@ -1,40 +1,80 @@
-# Blood Sugar Tracker - ثبت قند خون
+# Blood Sugar Tracker - ثبت قند خون 🩸
 
-یک اپلیکیشن Flutter برای ثبت و پیگیری قند خون با تقویم شمسی
+[![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue.svg)](https://flutter.dev)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-Automated-success.svg)](.github/workflows/)
 
-## ویژگی‌ها
+یک اپلیکیشن Flutter حرفه‌ای برای ثبت و پیگیری قند خون با تقویم شمسی و سیستم CI/CD کامل
 
+## ✨ ویژگی‌های اپلیکیشن
+
+### 📱 ویژگی‌های اصلی
 - 📅 **تقویم شمسی**: ثبت اطلاعات با تاریخ شمسی (جلالی)
 - 📊 **نمودارهای جداگانه**: نمایش نمودار قند خون ناشتا و غیر ناشتا در 3 ماه گذشته
 - 💾 **ذخیره محلی**: ذخیره‌سازی داده‌ها به صورت محلی با SQLite
 - 🔄 **یک ثبت در روز**: امکان ثبت یا ویرایش تنها یک مورد در هر روز
-- 📈 **آمار**: نمایش میانگین، بیشترین و کمترین مقادیر
-- 🎨 **رابط کاربری زیبا**: طراحی مدرن و کاربرپسند
+- 📈 **آمار پیشرفته**: نمایش میانگین، بیشترین و کمترین مقادیر
+- 🎨 **رابط کاربری زیبا**: طراحی مدرن و کاربرپسند با Material Design 3
 
-## نصب و راه‌اندازی
+### 🤖 CI/CD Automation
+- ✅ **Build خودکار**: ساخت خودکار APK و AAB در هر کامیت
+- ✅ **نسخه‌گذاری هوشمند**: افزایش خودکار نسخه (+0.01 در هر کامیت)
+- ✅ **تگ‌گذاری خودکار**: ایجاد خودکار تگ Git برای هر نسخه
+- ✅ **Release خودکار**: انتشار خودکار در GitHub با فایل‌های قابل دانلود
+- ✅ **تست خودکار**: اجرای تست‌ها و بررسی کد در هر PR
+- ✅ **Manual Release**: امکان انتشار دستی با کنترل کامل
 
-### پیش‌نیازها
+## 🚀 شروع سریع
 
-- Flutter SDK (نسخه 3.0.0 یا بالاتر)
-- Dart SDK
+### برای کاربران (دانلود و نصب)
 
-### مراحل نصب
+1. به صفحه [Releases](../../releases) بروید
+2. آخرین نسخه را دانلود کنید (`app-release.apk`)
+3. فایل APK را روی گوشی اندروید خود نصب کنید
+4. از اپلیکیشن لذت ببرید! 🎉
 
-1. کلون کردن پروژه:
+### برای توسعه‌دهندگان (Development)
+
+#### پیش‌نیازها
+- Flutter SDK 3.0.0+
+- Git
+- Android Studio / VS Code (اختیاری)
+
+#### نصب و اجرا
+
 ```bash
+# 1. کلون پروژه
 git clone <repository-url>
 cd blood_sugar_tracker
-```
 
-2. نصب وابستگی‌ها:
-```bash
+# 2. نصب dependencies
 flutter pub get
+
+# 3. اجرای اپلیکیشن
+flutter run
+
+# 4. یا ساخت APK
+flutter build apk --release
 ```
 
-3. اجرای برنامه:
+#### راه‌اندازی CI/CD
+
+برای فعال‌سازی CI/CD خودکار:
+
 ```bash
-flutter run
+# 1. Push به GitHub
+git push origin main
+
+# 2. تنظیم GitHub Actions
+# Settings → Actions → General
+# - Workflow permissions: "Read and write"
+# - ✅ Allow GitHub Actions to create and approve pull requests
+
+# 3. تمام! 🎉
+# از این به بعد هر کامیت = Release خودکار
 ```
+
+📚 **راهنمای کامل**: [SETUP.md](SETUP.md)
 
 ## استفاده
 

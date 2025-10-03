@@ -79,7 +79,8 @@ class _EntryScreenState extends State<EntryScreen> {
   @override
   Widget build(BuildContext context) {
     final jalali = Jalali.now();
-    final persianDate = '${jalali.formatter.wN} ${jalali.formatter.d} ${jalali.formatter.mN} ${jalali.formatter.yyyy}';
+    final persianDate =
+        '${jalali.formatter.wN} ${jalali.formatter.d} ${jalali.formatter.mN} ${jalali.formatter.yyyy}';
 
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());

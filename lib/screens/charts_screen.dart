@@ -184,7 +184,6 @@ class _ChartsScreenState extends State<ChartsScreen> {
                     final minValue = _calculateMin(entries);
                     final maxValue = _calculateMax(entries);
                     final range = (maxValue - minValue).abs();
-                    // If all values equal, give a fixed padding to avoid zero range
                     final padding = range == 0 ? 10 : range * 0.1;
                     return (minValue - padding).clamp(0.0, double.infinity);
                   }(),

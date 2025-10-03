@@ -183,13 +183,16 @@ class _ChartsScreenState extends State<ChartsScreen> {
                   minY: () {
                     final minValue = _calculateMin(entries);
                     final maxValue = _calculateMax(entries);
-                    final padding = (maxValue - minValue) * 0.1;
+                    final range = (maxValue - minValue).abs();
+                    // If all values equal, give a fixed padding to avoid zero range
+                    final padding = range == 0 ? 10 : range * 0.1;
                     return (minValue - padding).clamp(0.0, double.infinity);
                   }(),
                   maxY: () {
                     final minValue = _calculateMin(entries);
                     final maxValue = _calculateMax(entries);
-                    final padding = (maxValue - minValue) * 0.1;
+                    final range = (maxValue - minValue).abs();
+                    final padding = range == 0 ? 10 : range * 0.1;
                     return maxValue + padding;
                   }(),
                   lineBarsData: [

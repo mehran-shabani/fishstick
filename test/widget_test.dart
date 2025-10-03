@@ -8,7 +8,14 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that the app builds without crashing.
+    // Pump and settle to allow all async operations to complete.
+    await tester.pumpAndSettle();
+
+    // Verify that the app builds without crashing and shows the title.
     expect(find.text('ثبت قند خون'), findsOneWidget);
+
+    // Verify navigation tabs are present.
+    expect(find.text('ثبت'), findsOneWidget);
+    expect(find.text('نمودار'), findsOneWidget);
   });
 }

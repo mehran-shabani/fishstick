@@ -28,7 +28,7 @@ class _EntryScreenState extends State<EntryScreen> {
     setState(() => _isLoading = true);
     final entry = await _db.getTodayEntry();
     if (!mounted) return;
-    
+
     if (entry != null) {
       setState(() {
         _todayEntry = entry;

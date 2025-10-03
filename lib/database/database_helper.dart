@@ -84,6 +84,7 @@ class DatabaseHelper {
 
     return maps.map((map) => BloodSugarEntry.fromMap(map)).toList();
   }
+
   Future<List<BloodSugarEntry>> getEntriesLastMonths(int months) async {
     final db = await database;
     // Compute cutoff using Jalali to avoid end-of-month overflow issues

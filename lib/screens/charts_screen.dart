@@ -27,7 +27,7 @@ class _ChartsScreenState extends State<ChartsScreen> {
     setState(() => _isLoading = true);
     final entries = await _db.getEntriesLastMonths(3);
     if (!mounted) return;
-    
+
     setState(() {
       _entries = entries;
       _fastingEntries = entries.where((e) => e.isFasting).toList();

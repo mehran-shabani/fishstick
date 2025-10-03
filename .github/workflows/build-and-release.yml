@@ -1,0 +1,141 @@
+name: Build, Version, and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  version-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Analyze code
+        run: flutter analyze
+      
+      - name: Run tests
+        run: flutter test
+      
+      - name: Increment version
+        id: version
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          # Read current version from pubspec.yaml
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Parse version components
+          MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+          MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
+          PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
+          
+          # Increment by 0.01 (add 1 to patch, handle overflow)
+          NEW_PATCH=$((PATCH + 1))
+          if [ $NEW_PATCH -ge 100 ]; then
+            NEW_MINOR=$((MINOR + 1))
+            NEW_PATCH=0
+            if [ $NEW_MINOR -ge 100 ]; then
+              MAJOR=$((MAJOR + 1))
+              NEW_MINOR=0
+            fi
+          else
+            NEW_MINOR=$MINOR
+          fi
+          
+          # Build number (using commit count)
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          
+          NEW_VERSION="${MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
+          FULL_VERSION="${NEW_VERSION}+${BUILD_NUMBER}"
+          
+          echo "New version: $FULL_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: ${FULL_VERSION}/" pubspec.yaml
+      
+      - name: Build APK (Android)
+        run: flutter build apk --release
+      
+      - name: Build App Bundle (Android)
+        run: flutter build appbundle --release
+      
+      - name: Commit version bump
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add pubspec.yaml
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.version.outputs.full_version }} [skip ci]"
+          git push
+      
+      - name: Create Git Tag
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+      
+      - name: Create Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.version.outputs.version }}"
+          name: "Release v${{ steps.version.outputs.version }}"
+          body: |
+            ## 🎉 نسخه ${{ steps.version.outputs.version }}
+            
+            ### تغییرات
+            - بهبود و بروزرسانی خودکار
+            - شماره ساخت: ${{ steps.version.outputs.build_number }}
+            
+            ### فایل‌های قابل دانلود
+            - APK اندروید
+            - App Bundle اندروید
+            
+            ### نصب
+            1. فایل APK را دانلود کنید
+            2. بر روی دستگاه اندروید خود نصب کنید
+            
+            ---
+            *این نسخه به صورت خودکار ساخته و منتشر شده است*
+          draft: false
+          prerelease: false
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+      
+      - name: Upload App Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/app-release.aab

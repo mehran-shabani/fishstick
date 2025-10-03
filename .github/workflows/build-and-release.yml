@@ -35,7 +35,6 @@ jobs:
       
       - name: Run tests
         run: flutter test
-        continue-on-error: true
       
       - name: Increment version
         id: version
@@ -79,11 +78,9 @@ jobs:
       
       - name: Build APK (Android)
         run: flutter build apk --release
-        continue-on-error: true
       
       - name: Build App Bundle (Android)
         run: flutter build appbundle --release
-        continue-on-error: true
       
       - name: Commit version bump
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
@@ -102,7 +99,7 @@ jobs:
       
       - name: Create Release
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.version.outputs.version }}"
           name: "Release v${{ steps.version.outputs.version }}"
@@ -136,11 +133,9 @@ jobs:
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-        continue-on-error: true
       
       - name: Upload App Bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-aab
           path: build/app/outputs/bundle/release/app-release.aab
-        continue-on-error: true

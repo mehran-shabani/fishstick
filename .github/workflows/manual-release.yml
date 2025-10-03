@@ -98,7 +98,6 @@ jobs:
       
       - name: Run tests
         run: flutter test
-        continue-on-error: true
       
       - name: Build APK
         run: flutter build apk --release
@@ -120,7 +119,7 @@ jobs:
           git push origin "v${{ steps.version.outputs.version }}"
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.version.outputs.version }}"
           name: "نسخه ${{ steps.version.outputs.version }}"

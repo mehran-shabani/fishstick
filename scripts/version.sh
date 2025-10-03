@@ -13,9 +13,9 @@ CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+
 echo "Current version: $CURRENT_VERSION"
 
 # Parse version components
-MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
-MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
-PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
+MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+PATCH=$(echo "$CURRENT_VERSION" | cut -d. -f3)
 
 echo ""
 echo "Select increment type:"
@@ -23,7 +23,7 @@ echo "1) Patch (+0.01)  - مثال: 1.0.0 -> 1.0.1"
 echo "2) Minor (+0.1)   - مثال: 1.0.0 -> 1.1.0"
 echo "3) Major (+1)     - مثال: 1.0.0 -> 2.0.0"
 echo "4) Custom version"
-read -p "Enter choice (1-4): " choice
+read -r -p "Enter choice (1-4): " choice
 
 case $choice in
   1)
@@ -56,7 +56,7 @@ case $choice in
     NEW_VERSION="${MAJOR}.${NEW_MINOR}.${NEW_PATCH}"
     ;;
   4)
-    read -p "Enter new version (e.g., 2.1.5): " NEW_VERSION
+    read -r -p "Enter new version (e.g., 2.1.5): " NEW_VERSION
     ;;
   *)
     echo "Invalid choice!"
@@ -70,7 +70,7 @@ FULL_VERSION="${NEW_VERSION}+${BUILD_NUMBER}"
 
 echo ""
 echo "New version: $FULL_VERSION"
-read -p "Proceed with this version? (y/n): " confirm
+read -r -p "Proceed with this version? (y/n): " confirm
 
 if [ "$confirm" != "y" ]; then
   echo "Cancelled."

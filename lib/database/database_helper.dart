@@ -86,8 +86,14 @@ class DatabaseHelper {
   }
   Future<List<BloodSugarEntry>> getEntriesLastMonths(int months) async {
     final db = await database;
-    final now = DateTime.now();
-    final cutoffDate = DateTime(now.year, now.month - months, now.day);
+    // Compute cutoff using Jalali to avoid end-of-month overflow issues
+    final nowJalali = Jalali.now();
+    final cutoffGregorian = nowJalali.addMonths(-months).toGregorian();
+    final cutoffDate = DateTime(
+      cutoffGregorian.year,
+      cutoffGregorian.month,
+      cutoffGregorian.day,
+    );
     final cutoffTimestamp = cutoffDate.millisecondsSinceEpoch;
 
     final maps = await db.query(
